@@ -26,18 +26,18 @@ jobs:
       - name: Build Docker container
         id: build-image
         run: |
-          docker build -t $ECR_REGISTRY/gsh/lambda-easebase-proxy:dev .
+          docker build -t $ECR_REGISTRY/gsh/lambda-easebase-proxy:latest .
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
       - name: Push image to Amazon ECR
-        run: docker push $ECR_REGISTRY/gsh/lambda-easebase-proxy:dev
+        run: docker push $ECR_REGISTRY/gsh/lambda-easebase-proxy:latest
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
-      - name: Update AWS dev lambda to point to new image
+      - name: Update AWS lambda to point to new image
         run: |
-          image_sha=`docker images --digests | grep lambda-easebase-proxy | grep dev | awk '{print $3}' | grep sha256`
+          image_sha=`docker images --digests | grep lambda-easebase-proxy | grep latest | awk '{print $3}' | grep sha256`
           echo "Pointing lambda to new sha: ${image_sha}"
           aws lambda update-function-code --function-name lambda-easebase-proxy \
-          --image-uri $ECR_REGISTRY/gsh/lambda-easebase-proxy@${image_sha} 2>&1 > /dev/null
+          --image-uri $ECR_REGISTRY/gsh/lambda-easebase-proxy@${image_sha} 2>&1 > /latest/null
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
