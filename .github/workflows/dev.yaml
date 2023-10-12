@@ -33,11 +33,16 @@ jobs:
         run: docker push $ECR_REGISTRY/gsh/lambda-easebase-proxy:latest
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
-      - name: Update AWS lambda to point to new image
+      - name: Update AWS dev lambda to point to new image
         run: |
-          image_sha=`docker images --digests | grep lambda-easebase-proxy | grep latest | awk '{print $3}' | grep sha256`
-          echo "Pointing lambda to new sha: ${image_sha}"
-          aws lambda update-function-code --function-name lambda-easebase-proxy \
-          --image-uri $ECR_REGISTRY/gsh/lambda-easebase-proxy@${image_sha} 2>&1 > /latest/null
+          image_sha=$(docker images --digests | grep lambda-easebase-proxy | grep latest | awk '{print $3}')
+          if [[ -n "$image_sha" ]]; then
+            echo "Pointing lambda to new sha: ${image_sha}"
+            aws lambda update-function-code --function-name lambda-easebase-proxy \
+            --image-uri $ECR_REGISTRY/gsh/lambda-easebase-proxy@${image_sha} 2>&1 > /dev/null
+          else
+            echo "Failed to find image SHA."
+            exit 1
+          fi
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
