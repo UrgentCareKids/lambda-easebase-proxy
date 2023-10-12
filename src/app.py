@@ -30,7 +30,7 @@ def handler(event, context):
         connection = psycopg2.connect(
             host=secret['host'],
             port=secret['port'],
-            dbname=secret['dbname'],
+            dbname='postgres',
             user=secret['username'],
             password=secret['password']
         )
